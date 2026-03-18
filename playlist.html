@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playlist - M-Clip</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 50%, #1a2f1a 100%);
+            min-height: 100vh;
+            color: #e8e8e8;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(13, 13, 13, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(74, 222, 128, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 1000;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .nav-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(74, 222, 128, 0.2);
+        }
+
+        .nav-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .nav-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 50%, #86efac 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link {
+            padding: 0.6rem 1.25rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #a3a3a3;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #4ade80;
+            background: rgba(74, 222, 128, 0.1);
+        }
+
+        .main-content {
+            padding-top: 70px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 6rem 2rem 2rem;
+        }
+
+        .playlist-builder {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 2rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #4ade80;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .track-selector {
+            background: linear-gradient(145deg, rgba(26, 26, 26, 0.8) 0%, rgba(13, 13, 13, 0.9) 100%);
+            border: 1px solid rgba(74, 222, 128, 0.15);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .track-option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+        }
+
+        .track-option:last-child {
+            margin-bottom: 0;
+        }
+
+        .track-option:hover {
+            background: rgba(74, 222, 128, 0.1);
+        }
+
+        .track-option.selected {
+            background: rgba(74, 222, 128, 0.2);
+            border: 1px solid rgba(74, 222, 128, 0.4);
+        }
+
+        .track-checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid rgba(74, 222, 128, 0.4);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .track-option.selected .track-checkbox {
+            background: #4ade80;
+            border-color: #4ade80;
+        }
+
+        .track-checkbox svg {
+            width: 14px;
+            height: 14px;
+            fill: #0d0d0d;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .track-option.selected .track-checkbox svg {
+            opacity: 1;
+        }
+
+        .track-name {
+            font-size: 1rem;
+            color: #e8e8e8;
+            font-weight: 500;
+        }
+
+        .track-search {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            font-family: 'Space Grotesk', sans-serif;
+            color: #e8e8e8;
+            background: rgba(13, 13, 13, 0.5);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .track-search::placeholder {
+            color: #666;
+        }
+
+        .track-search:focus {
+            border-color: #4ade80;
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.15);
+        }
+
+        .track-option.hidden {
+            display: none;
+        }
+
+        .no-search-results {
+            text-align: center;
+            color: #888;
+            padding: 1rem;
+            font-size: 0.95rem;
+            display: none;
+        }
+
+        .playlist-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'Space Grotesk', sans-serif;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            color: #0d0d0d;
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(74, 222, 128, 0.4);
+        }
+
+        .btn-secondary {
+            color: #e8e8e8;
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(74, 222, 128, 0.2);
+        }
+
+        .player-section {
+            width: 100%;
+            max-width: 500px;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .player-section.active {
+            display: block;
+        }
+
+        .album-art {
+            width: 100%;
+            aspect-ratio: 1;
+            background: linear-gradient(145deg, rgba(74, 222, 128, 0.1) 0%, rgba(34, 197, 94, 0.1) 100%);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .album-art svg {
+            width: 100px;
+            height: 100px;
+            fill: #4ade80;
+            opacity: 0.6;
+        }
+
+        .track-info {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .track-info h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #e8e8e8;
+            margin-bottom: 0.5rem;
+        }
+
+        .track-info p {
+            font-size: 1rem;
+            color: #888;
+        }
+
+        .progress-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(74, 222, 128, 0.2);
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4ade80 0%, #22c55e 100%);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .control-btn svg {
+            fill: #a3a3a3;
+            transition: fill 0.3s ease;
+        }
+
+        .control-btn:hover svg {
+            fill: #4ade80;
+        }
+
+        .control-btn.loop {
+            position: relative;
+        }
+
+        .control-btn.loop.active svg {
+            fill: #4ade80;
+        }
+
+        .control-btn.loop.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background: #4ade80;
+            border-radius: 50%;
+        }
+
+        .control-btn.play {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            border-radius: 50%;
+            box-shadow: 0 10px 30px rgba(74, 222, 128, 0.4);
+        }
+
+        .control-btn.play:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(74, 222, 128, 0.5);
+        }
+
+        .control-btn.play svg {
+            fill: #0d0d0d;
+            width: 28px;
+            height: 28px;
+        }
+
+        .playlist-queue {
+            background: linear-gradient(145deg, rgba(26, 26, 26, 0.8) 0%, rgba(13, 13, 13, 0.9) 100%);
+            border: 1px solid rgba(74, 222, 128, 0.15);
+            border-radius: 16px;
+            padding: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .queue-title {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .queue-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #a3a3a3;
+            transition: all 0.3s ease;
+        }
+
+        .queue-item.active {
+            background: rgba(74, 222, 128, 0.15);
+            color: #4ade80;
+            font-weight: 500;
+        }
+
+        .queue-item.dragging {
+            opacity: 0.5;
+            border: 2px dashed #4ade80;
+        }
+
+        .queue-item .drag-handle {
+            cursor: grab;
+            padding: 0.5rem;
+            margin-right: 0.5rem;
+            color: #666;
+            transition: color 0.3s ease;
+        }
+
+        .queue-item .drag-handle:hover {
+            color: #4ade80;
+        }
+
+        .queue-item .drag-handle svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .queue-item.played {
+            opacity: 0.5;
+        }
+
+        .queue-number {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(74, 222, 128, 0.1);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .queue-item.active .queue-number {
+            background: #4ade80;
+            color: #0d0d0d;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0 1rem;
+                height: 60px;
+            }
+
+            .nav-logo {
+                width: 36px;
+                height: 36px;
+            }
+
+            .nav-title {
+                font-size: 1.25rem;
+            }
+
+            .nav-link {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            .main-content {
+                padding: 5rem 1rem 2rem;
+            }
+
+            .section-title {
+                font-size: 1.25rem;
+            }
+
+            .track-selector {
+                padding: 1rem;
+            }
+
+            .album-art svg {
+                width: 80px;
+                height: 80px;
+            }
+
+            .track-info h2 {
+                font-size: 1.5rem;
+            }
+
+            .control-btn.play {
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">
+            <div class="nav-logo">
+                <img src="15026.jpg" alt="M-Clip Logo">
+            </div>
+            <span class="nav-title">M-Clip</span>
+        </a>
+        <div class="nav-links">
+            <a href="player.html" class="nav-link">Back</a>
+            <a href="https://github.com/Https-Mango/" target="_blank" class="nav-link">Https-Mango</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="playlist-builder" id="playlistBuilder">
+            <h2 class="section-title">Select Tracks for Playlist</h2>
+            <div class="track-selector" id="trackSelector">
+                <input type="text" class="track-search" id="trackSearch" placeholder="Search tracks...">
+                <div class="track-option" data-track="s0rrow.mp3" data-name="im not alright">
+                    <div class="track-checkbox">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <span class="track-name">im not alright — s0rrow</span>
+                </div>
+                <div class="track-option" data-track="akkiemi.mp3" data-name="sick n scik">
+                    <div class="track-checkbox">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <span class="track-name">sick n scik — akkiemi</span>
+                </div>
+                <div class="track-option" data-track="alexg.mp3" data-name="Harvey">
+                    <div class="track-checkbox">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <span class="track-name">Harvey — Alex G</span>
+                </div>
+                <div class="track-option" data-track="wifiskeleton.mp3" data-name="Lovefool demo">
+                    <div class="track-checkbox">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <span class="track-name">Lovefool demo — Wifiskeleton</span>
+                </div>
+                <div class="track-option" data-track="aeter.mp3" data-name="Sociopath">
+                    <div class="track-checkbox">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <span class="track-name">Sociopath — Aeter</span>
+                </div>
+                <div class="track-option" data-track="calvinharris.mp3" data-name="How Deep Is Your Love">
+                    <div class="track-checkbox">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <span class="track-name">How Deep Is Your Love — Calvin Harris</span>
+                </div>
+                <div class="track-option" data-track="adezcano.m4a" data-name="vodka vodka beluga">
+                    <div class="track-checkbox">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <span class="track-name">vodka vodka beluga — Adezcano</span>
+                </div>
+                <div class="track-option" data-track="csvz.m4a" data-name="Illusionary Daytime x Trackmaker Douyin">
+                    <div class="track-checkbox">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <span class="track-name">Illusionary Daytime x Trackmaker Douyin — Csvzx</span>
+                </div>
+                <div class="track-option" data-track="givemehits.mp3" data-name="give me hits">
+                    <div class="track-checkbox">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <span class="track-name">give me hits — s0rrow</span>
+                </div>
+                <div class="track-option" data-track="sarah.mp3" data-name="sarah">
+                    <div class="track-checkbox">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <span class="track-name">sarah — Alex G</span>
+                </div>
+                <div class="track-option" data-track="truthyandere.mp3" data-name="truth yandere">
+                    <div class="track-checkbox">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <span class="track-name">truth yandere — akkiemi</span>
+                </div>
+                <div class="track-option" data-track="keepingsecrets.mp3" data-name="keeping secrets">
+                    <div class="track-checkbox">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <span class="track-name">keeping secrets — Wifiskeleton</span>
+                </div>
+            </div>
+            <div class="saved-playlists" style="margin-bottom: 1.5rem;">
+                <h3 style="font-size: 1rem; color: #888; margin-bottom: 0.75rem;">Saved Playlists</h3>
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                    <button class="btn btn-secondary" id="savePlaylist1" style="flex: 1; min-width: 120px; padding: 0.75rem;">Save to Slot 1</button>
+                    <button class="btn btn-secondary" id="savePlaylist2" style="flex: 1; min-width: 120px; padding: 0.75rem;">Save to Slot 2</button>
+                </div>
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.75rem;">
+                    <button class="btn btn-secondary" id="loadPlaylist1" style="flex: 1; min-width: 120px; padding: 0.75rem;">Load Slot 1</button>
+                    <button class="btn btn-secondary" id="loadPlaylist2" style="flex: 1; min-width: 120px; padding: 0.75rem;">Load Slot 2</button>
+                </div>
+            </div>
+            <div class="playlist-actions">
+                <button class="btn btn-secondary" id="clearBtn">Clear All</button>
+                <button class="btn btn-primary" id="startPlaylistBtn">Start Playlist</button>
+            </div>
+        </div>
+
+        <div class="player-section" id="playerSection">
+            <div class="album-art">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                </svg>
+            </div>
+
+            <div class="track-info">
+                <h2 id="currentTrackName">Select a track</h2>
+                <p id="trackCounter">Track 0 of 0</p>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress" id="progress"></div>
+                </div>
+                <div class="time-display">
+                    <span id="currentTime">0:00</span>
+                    <span id="duration">0:00</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn loop" id="loopPlaylistBtn" title="Loop playlist">
+                    <svg width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/>
+                    </svg>
+                </button>
+
+                <button class="control-btn" id="prevBtn">
+                    <svg width="28" height="28" viewBox="0 0 24 24">
+                        <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                    </svg>
+                </button>
+
+                <button class="control-btn play" id="playBtn">
+                    <svg width="28" height="28" viewBox="0 0 24 24" id="playIcon">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    <svg width="28" height="28" viewBox="0 0 24 24" id="pauseIcon" style="display: none;">
+                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                    </svg>
+                </button>
+
+                <button class="control-btn" id="nextBtn">
+                    <svg width="28" height="28" viewBox="0 0 24 24">
+                        <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="playlist-queue" id="playlistQueue">
+                <div class="queue-title">Playlist Queue</div>
+                <div id="queueList"></div>
+            </div>
+
+            <div class="playlist-actions" style="margin-top: 1.5rem;">
+                <button class="btn btn-secondary" id="backToSelection">Back to Selection</button>
+            </div>
+        </div>
+    </main>
+
+    <audio id="audio"></audio>
+
+    <script>
+        const trackOptions = document.querySelectorAll('.track-option');
+        const trackSearch = document.getElementById('trackSearch');
+        const clearBtn = document.getElementById('clearBtn');
+        const startPlaylistBtn = document.getElementById('startPlaylistBtn');
+        const playlistBuilder = document.getElementById('playlistBuilder');
+        const playerSection = document.getElementById('playerSection');
+        const backToSelection = document.getElementById('backToSelection');
+        const audio = document.getElementById('audio');
+        const playBtn = document.getElementById('playBtn');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progress = document.getElementById('progress');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        const currentTrackName = document.getElementById('currentTrackName');
+        const trackCounter = document.getElementById('trackCounter');
+        const queueList = document.getElementById('queueList');
+
+        let selectedTracks = [];
+        let currentTrackIndex = 0;
+        let isPlaying = false;
+        let isLoopingPlaylist = false;
+
+        const savePlaylist1Btn = document.getElementById('savePlaylist1');
+        const savePlaylist2Btn = document.getElementById('savePlaylist2');
+        const loadPlaylist1Btn = document.getElementById('loadPlaylist1');
+        const loadPlaylist2Btn = document.getElementById('loadPlaylist2');
+        const loopPlaylistBtn = document.getElementById('loopPlaylistBtn');
+
+        trackOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                option.classList.toggle('selected');
+                updateSelectedTracks();
+            });
+        });
+
+        trackSearch.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            let hasResults = false;
+            
+            trackOptions.forEach(option => {
+                const trackName = option.dataset.name.toLowerCase();
+                if (trackName.includes(query)) {
+                    option.classList.remove('hidden');
+                    hasResults = true;
+                } else {
+                    option.classList.add('hidden');
+                }
+            });
+        });
+
+        function updateSelectedTracks() {
+            selectedTracks = [];
+            document.querySelectorAll('.track-option.selected').forEach(option => {
+                selectedTracks.push({
+                    file: option.dataset.track,
+                    name: option.dataset.name
+                });
+            });
+        }
+
+        clearBtn.addEventListener('click', () => {
+            trackOptions.forEach(option => option.classList.remove('selected'));
+            selectedTracks = [];
+        });
+
+        savePlaylist1Btn.addEventListener('click', () => savePlaylist(1));
+        savePlaylist2Btn.addEventListener('click', () => savePlaylist(2));
+        loadPlaylist1Btn.addEventListener('click', () => loadPlaylist(1));
+        loadPlaylist2Btn.addEventListener('click', () => loadPlaylist(2));
+
+        loopPlaylistBtn.addEventListener('click', () => {
+            isLoopingPlaylist = !isLoopingPlaylist;
+            loopPlaylistBtn.classList.toggle('active', isLoopingPlaylist);
+        });
+
+        function savePlaylist(slot) {
+            if (selectedTracks.length === 0) {
+                alert('Please select at least one track to save!');
+                return;
+            }
+            localStorage.setItem(`mclip_playlist_${slot}`, JSON.stringify(selectedTracks));
+            alert(`Playlist saved to Slot ${slot}!`);
+        }
+
+        function loadPlaylist(slot) {
+            const saved = localStorage.getItem(`mclip_playlist_${slot}`);
+            if (!saved) {
+                alert(`No playlist found in Slot ${slot}!`);
+                return;
+            }
+            const playlist = JSON.parse(saved);
+            trackOptions.forEach(option => {
+                const trackFile = option.dataset.track;
+                const isInPlaylist = playlist.some(t => t.file === trackFile);
+                if (isInPlaylist) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+            updateSelectedTracks();
+            alert(`Playlist loaded from Slot ${slot}!`);
+        }
+
+        startPlaylistBtn.addEventListener('click', () => {
+            if (selectedTracks.length === 0) {
+                alert('Please select at least one track!');
+                return;
+            }
+            startPlaylist();
+        });
+
+        backToSelection.addEventListener('click', () => {
+            audio.pause();
+            isPlaying = false;
+            updatePlayButton();
+            playerSection.classList.remove('active');
+            playlistBuilder.style.display = 'block';
+        });
+
+        function startPlaylist() {
+            currentTrackIndex = 0;
+            playlistBuilder.style.display = 'none';
+            playerSection.classList.add('active');
+            renderQueue();
+            loadTrack(currentTrackIndex);
+            playTrack();
+        }
+
+        let draggedItem = null;
+
+        function renderQueue() {
+            queueList.innerHTML = '';
+            selectedTracks.forEach((track, index) => {
+                const item = document.createElement('div');
+                item.className = 'queue-item';
+                item.draggable = true;
+                item.dataset.index = index;
+                if (index === currentTrackIndex) item.classList.add('active');
+                if (index < currentTrackIndex) item.classList.add('played');
+                item.innerHTML = `
+                    <div class="drag-handle" title="Drag to reorder">
+                        <svg viewBox="0 0 24 24"><path d="M9 3H5v2h4V3zm0 4H5v2h4V7zm0 4H5v2h4v-2zm0 4H5v2h4v-2zm6-12h-4v2h4V3zm0 4h-4v2h4V7zm0 4h-4v2h4v-2zm0 4h-4v2h4v-2z"/></svg>
+                    </div>
+                    <div class="queue-number">${index + 1}</div>
+                    <span>${track.name}</span>
+                `;
+                
+                // Drag events
+                item.addEventListener('dragstart', (e) => {
+                    draggedItem = item;
+                    item.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+                
+                item.addEventListener('dragend', () => {
+                    item.classList.remove('dragging');
+                    draggedItem = null;
+                    // Update current track index if needed
+                    if (currentTrackIndex >= 0 && currentTrackIndex < selectedTracks.length) {
+                        renderQueue();
+                    }
+                });
+                
+                item.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if (!draggedItem || draggedItem === item) return;
+                    
+                    const draggedIndex = parseInt(draggedItem.dataset.index);
+                    const targetIndex = parseInt(item.dataset.index);
+                    
+                    // Reorder array
+                    const [movedTrack] = selectedTracks.splice(draggedIndex, 1);
+                    selectedTracks.splice(targetIndex, 0, movedTrack);
+                    
+                    // Update current track index
+                    if (currentTrackIndex === draggedIndex) {
+                        currentTrackIndex = targetIndex;
+                    } else if (draggedIndex < currentTrackIndex && targetIndex >= currentTrackIndex) {
+                        currentTrackIndex--;
+                    } else if (draggedIndex > currentTrackIndex && targetIndex <= currentTrackIndex) {
+                        currentTrackIndex++;
+                    }
+                    
+                    renderQueue();
+                });
+                
+                queueList.appendChild(item);
+            });
+        }
+
+        function loadTrack(index) {
+            if (index < 0 || index >= selectedTracks.length) return;
+            currentTrackIndex = index;
+            audio.src = selectedTracks[index].file;
+            currentTrackName.textContent = selectedTracks[index].name;
+            trackCounter.textContent = `Track ${index + 1} of ${selectedTracks.length}`;
+            renderQueue();
+        }
+
+        function playTrack() {
+            audio.play();
+            isPlaying = true;
+            updatePlayButton();
+        }
+
+        function pauseTrack() {
+            audio.pause();
+            isPlaying = false;
+            updatePlayButton();
+        }
+
+        function togglePlay() {
+            if (isPlaying) {
+                pauseTrack();
+            } else {
+                playTrack();
+            }
+        }
+
+        function updatePlayButton() {
+            if (isPlaying) {
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'block';
+            } else {
+                playIcon.style.display = 'block';
+                pauseIcon.style.display = 'none';
+            }
+        }
+
+        function nextTrack() {
+            if (currentTrackIndex < selectedTracks.length - 1) {
+                loadTrack(currentTrackIndex + 1);
+                playTrack();
+            }
+        }
+
+        function prevTrack() {
+            if (currentTrackIndex > 0) {
+                loadTrack(currentTrackIndex - 1);
+                playTrack();
+            }
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateProgress() {
+            if (audio.duration) {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progress.style.width = percent + '%';
+                currentTimeEl.textContent = formatTime(audio.currentTime);
+            }
+        }
+
+        function setProgress(e) {
+            const width = progressBar.clientWidth;
+            const clickX = e.offsetX;
+            const duration = audio.duration;
+            if (duration) {
+                audio.currentTime = (clickX / width) * duration;
+            }
+        }
+
+        playBtn.addEventListener('click', togglePlay);
+        nextBtn.addEventListener('click', nextTrack);
+        prevBtn.addEventListener('click', prevTrack);
+        audio.addEventListener('timeupdate', updateProgress);
+        audio.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = formatTime(audio.duration);
+        });
+        progressBar.addEventListener('click', setProgress);
+        audio.addEventListener('ended', () => {
+            if (currentTrackIndex < selectedTracks.length - 1) {
+                nextTrack();
+            } else if (isLoopingPlaylist) {
+                currentTrackIndex = 0;
+                loadTrack(0);
+                playTrack();
+            } else {
+                isPlaying = false;
+                updatePlayButton();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,656 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M-Clip Player</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 50%, #1a2f1a 100%);
+            min-height: 100vh;
+            color: #e8e8e8;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(13, 13, 13, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(74, 222, 128, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 1000;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .nav-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(74, 222, 128, 0.2);
+        }
+
+        .nav-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .nav-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 50%, #86efac 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link {
+            padding: 0.6rem 1.25rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #a3a3a3;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: #4ade80;
+            background: rgba(74, 222, 128, 0.1);
+        }
+
+        .nav-link.active {
+            color: #0d0d0d;
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+        }
+
+        .nav-link.active:hover {
+            color: #0d0d0d;
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            box-shadow: 0 4px 15px rgba(74, 222, 128, 0.3);
+        }
+
+        .main-content {
+            padding-top: 70px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 2rem 2rem;
+        }
+
+        .placeholder {
+            text-align: center;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .placeholder-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.1) 0%, rgba(34, 197, 94, 0.1) 100%);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(74, 222, 128, 0.2);
+        }
+
+        .placeholder-icon svg {
+            width: 50px;
+            height: 50px;
+            fill: #4ade80;
+        }
+
+        .placeholder h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #4ade80;
+            margin-bottom: 1rem;
+            letter-spacing: -0.5px;
+        }
+
+        .placeholder p {
+            font-size: 1.1rem;
+            color: #a3a3a3;
+            max-width: 400px;
+            line-height: 1.6;
+        }
+
+        .cards-container {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 3rem;
+        }
+
+        .card {
+            flex: 1;
+            min-width: 280px;
+            max-width: 380px;
+            background: linear-gradient(145deg, rgba(26, 26, 26, 0.8) 0%, rgba(13, 13, 13, 0.9) 100%);
+            border: 1px solid rgba(74, 222, 128, 0.15);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(74, 222, 128, 0.4);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                0 0 30px rgba(74, 222, 128, 0.1);
+        }
+
+        .artist-card {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .artist-card.active {
+            border-color: #4ade80;
+            box-shadow: 0 0 30px rgba(74, 222, 128, 0.2);
+        }
+
+        .tracks-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 0.5rem;
+            background: linear-gradient(145deg, rgba(26, 26, 26, 0.95) 0%, rgba(13, 13, 13, 0.98) 100%);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            border-radius: 16px;
+            padding: 1rem;
+            z-index: 100;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        .tracks-dropdown.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .track-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #e8e8e8;
+            margin-bottom: 0.5rem;
+        }
+
+        .track-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .track-item:hover {
+            background: rgba(74, 222, 128, 0.1);
+            transform: translateX(4px);
+        }
+
+        .track-item svg {
+            width: 20px;
+            height: 20px;
+            fill: #4ade80;
+            flex-shrink: 0;
+        }
+
+        .track-item span {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.15) 0%, rgba(34, 197, 94, 0.15) 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(74, 222, 128, 0.2);
+        }
+
+        .card-icon svg {
+            width: 28px;
+            height: 28px;
+            fill: #4ade80;
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #e8e8e8;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.3px;
+        }
+
+        .card p {
+            font-size: 1rem;
+            color: #888;
+            line-height: 1.6;
+        }
+
+        .search-wrapper {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 2rem;
+            animation: fadeIn 1s ease-out;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .search-main {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            font-family: 'Space Grotesk', sans-serif;
+            color: #e8e8e8;
+            background: linear-gradient(145deg, rgba(26, 26, 26, 0.8) 0%, rgba(13, 13, 13, 0.9) 100%);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            border-radius: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input::placeholder {
+            color: #666;
+        }
+
+        .search-input:focus {
+            border-color: #4ade80;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.2);
+        }
+
+        .search-input-small {
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+            border-radius: 12px;
+            max-width: 180px;
+        }
+
+        .search-btn {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'Space Grotesk', sans-serif;
+            color: #0d0d0d;
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(74, 222, 128, 0.4);
+        }
+
+        .search-track {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+
+        .search-divider {
+            font-size: 0.85rem;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #4ade80;
+            margin-bottom: 1rem;
+            text-align: center;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #888;
+            font-size: 1.1rem;
+            margin-top: 2rem;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0 1rem;
+                height: 60px;
+            }
+
+            .nav-logo {
+                width: 36px;
+                height: 36px;
+            }
+
+            .nav-title {
+                font-size: 1.25rem;
+            }
+
+            .nav-link {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            .main-content {
+                padding-top: 60px;
+                padding: 5rem 1rem 2rem;
+            }
+
+            .placeholder h2 {
+                font-size: 1.5rem;
+            }
+
+            .placeholder-icon {
+                width: 80px;
+                height: 80px;
+            }
+
+            .placeholder-icon svg {
+                width: 40px;
+                height: 40px;
+            }
+
+            .cards-container {
+                gap: 1rem;
+                margin-top: 2rem;
+            }
+
+            .card {
+                min-width: 100%;
+                max-width: 100%;
+                padding: 1.5rem;
+            }
+
+            .card-icon {
+                width: 50px;
+                height: 50px;
+            }
+
+            .card h3 {
+                font-size: 1.25rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-links {
+                gap: 0.25rem;
+            }
+
+            .nav-link {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.75rem;
+            }
+
+            .placeholder h2 {
+                font-size: 1.25rem;
+            }
+
+            .placeholder p {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">
+            <div class="nav-logo">
+                <img src="15026.jpg" alt="M-Clip Logo">
+            </div>
+            <span class="nav-title">M-Clip</span>
+        </a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="playlist.html" class="nav-link active">Playlist</a>
+            <a href="https://github.com/Https-Mango/" target="_blank" class="nav-link">Https-Mango</a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="placeholder">
+            <div class="placeholder-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                </svg>
+            </div>
+            <h2>Music Player</h2>
+            <p>Your music will appear here soon. This page is under development.</p>
+        </div>
+
+        <div class="search-wrapper">
+            <div class="search-main">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search artists...">
+                <button class="search-btn" id="searchBtn">Search</button>
+            </div>
+            <div class="search-track">
+                <span class="search-divider">or find by track</span>
+                <input type="text" class="search-input search-input-small" id="trackSearchInput" placeholder="Track name...">
+            </div>
+        </div>
+
+        <div class="no-results" id="noResults">No results found</div>
+
+        <div class="cards-container" id="artistsContainer">
+            <a href="artist-s0rrow.html" class="card artist-card" data-name="s0rrow">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                    </svg>
+                </div>
+                <h3>s0rrow</h3>
+            </a>
+
+            <a href="artist-akkiemi.html" class="card artist-card" data-name="akkiemi">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                    </svg>
+                </div>
+                <h3>akkiemi</h3>
+            </a>
+
+            <a href="artist-alexg.html" class="card artist-card" data-name="Alex G">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                    </svg>
+                </div>
+                <h3>Alex G</h3>
+            </a>
+
+            <a href="artist-wifiskeleton.html" class="card artist-card" data-name="Wifiskeleton">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                    </svg>
+                </div>
+                <h3>Wifiskeleton</h3>
+            </a>
+
+            <a href="artist-aeter.html" class="card artist-card" data-name="Aeter">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                    </svg>
+                </div>
+                <h3>Aeter</h3>
+            </a>
+
+            <a href="artist-calvinharris.html" class="card artist-card" data-name="Calvin Harris">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                    </svg>
+                </div>
+                <h3>Calvin Harris</h3>
+            </a>
+
+            <a href="artist-adezcano.html" class="card artist-card" data-name="Adezcano">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                    </svg>
+                </div>
+                <h3>Adezcano</h3>
+            </a>
+
+            <a href="artist-csvzx.html" class="card artist-card" data-name="Csvzx">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                    </svg>
+                </div>
+                <h3>Csvzx</h3>
+            </a>
+        </div>
+    </main>
+
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const trackSearchInput = document.getElementById('trackSearchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const artistsContainer = document.getElementById('artistsContainer');
+        const noResults = document.getElementById('noResults');
+        const artistCards = artistsContainer.querySelectorAll('.artist-card');
+
+        const artistTracks = {
+            's0rrow': 'im not alright',
+            'akkiemi': 'sick n scik',
+            'Alex G': 'harvey',
+            'Wifiskeleton': 'lovefool demo',
+            'Aeter': 'sociopath',
+            'Calvin Harris': 'how deep is your love',
+            'Adezcano': 'vodka vodka beluga',
+            'Csvzx': 'illusionary daytime x trackmaker douyin'
+        };
+
+        function performSearch() {
+            const artistQuery = searchInput.value.trim().toLowerCase();
+            const trackQuery = trackSearchInput.value.trim().toLowerCase();
+            
+            if (!artistQuery && !trackQuery) {
+                artistCards.forEach(card => card.style.display = 'block');
+                noResults.style.display = 'none';
+                return;
+            }
+
+            let found = false;
+            
+            artistCards.forEach(card => {
+                const artistName = card.getAttribute('data-name').toLowerCase();
+                const trackName = (artistTracks[card.getAttribute('data-name')] || '').toLowerCase();
+                
+                const artistMatch = !artistQuery || artistName.includes(artistQuery);
+                const trackMatch = !trackQuery || trackName.includes(trackQuery);
+                
+                if (artistMatch && trackMatch) {
+                    card.style.display = 'block';
+                    found = true;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            noResults.style.display = found ? 'none' : 'block';
+        }
+
+        searchBtn.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+        trackSearchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        searchInput.addEventListener('input', () => {
+            if (searchInput.value.trim() === '' && trackSearchInput.value.trim() === '') {
+                cards.forEach(card => card.style.display = 'block');
+                noResults.style.display = 'none';
+            }
+        });
+        trackSearchInput.addEventListener('input', () => {
+            if (searchInput.value.trim() === '' && trackSearchInput.value.trim() === '') {
+                cards.forEach(card => card.style.display = 'block');
+                noResults.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
